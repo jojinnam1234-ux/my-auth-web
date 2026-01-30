@@ -1,7 +1,13 @@
+const cors = require('cors');
 const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
+
+app.use(cors());
+
+// public 폴더 안에 있는 파일들을 정적 파일로 제공합니다.
+app.use(express.static('public'));
 
 const app = express();
 app.use(express.json()); // JSON 요청 본문을 읽기 위한 설정

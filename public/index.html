@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <title>나의 첫 웹사이트</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+
+        input {
+            margin: 5px;
+            padding: 10px;
+            width: 200px;
+        }
+
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>회원가입</h2>
+    <input type="text" id="regUser" placeholder="아이디">
+    <input type="password" id="regPass" placeholder="비밀번호">
+    <button onclick="register()">가입하기</button>
+
+    <hr style="width: 300px; margin: 30px;">
+
+    <h2>로그인</h2>
+    <input type="text" id="loginUser" placeholder="아이디">
+    <input type="password" id="loginPass" placeholder="비밀번호">
+    <button onclick="login()">로그인</button>
+
+    <script>
+        // 🚨 여기에 Render에서 받은 본인의 URL을 넣으세요!
+        const SERVER_URL = 'https://my-auth-web.onrender.com';
+
+        async function register() {
+            const username = document.getElementById('regUser').value;
+            const password = document.getElementById('regPass').value;
+
+            const res = await fetch(`${SERVER_URL}/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+        }
+
+        async function login() {
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+
+            const res = await fetch(`${SERVER_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+            alert(data.message || data.error);
+        }
+    </script>
+</body>
+
+</html>
