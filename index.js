@@ -13,7 +13,7 @@ app.use(express.static('public')); // HTML 파일을 보여주기 위한 설정
 
 // DB 연결 설정
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: 'postgresql://postgres:U6XKky1FNRL34pak@db.cwnplwdhwjuknopbrlcf.supabase.co:5432/postgres',
     ssl: { rejectUnauthorized: false } // 클라우드 DB 접속을 위한 설정
 });
 
