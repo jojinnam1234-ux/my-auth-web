@@ -1,55 +1,47 @@
-const cors = require('cors');
 const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
+const cors = require('cors'); // 추가됨
 require('dotenv').config();
 
+const app = express(); // ⭐ 반드시 app을 여기서 먼저 선언해야 합니다!
+
+// 설정을 먼저 선언한 'app' 뒤에 붙입니다.
 app.use(cors());
-
-// public 폴더 안에 있는 파일들을 정적 파일로 제공합니다.
-app.use(express.static('public'));
-
-const app = express();
-app.use(express.json()); // JSON 요청 본문을 읽기 위한 설정
+app.use(express.json());
+app.use(express.static('public')); // HTML 파일을 보여주기 위한 설정
 
 // DB 연결 설정
-// 기존의 process.env.DATABASE_URL 대신 직접 주소를 넣어봅니다.
 const pool = new Pool({
-    connectionString: 'postgresql://postgres:U6XKky1FNRL34pak@db.cwnplwdhwjuknopbrlcf.supabase.co:5432/postgres',
-    ssl: { rejectUnauthorized: false } // Supabase 연결 시 보안 설정을 추가해줍니다.
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // 클라우드 DB 접속을 위한 설정
 });
-// 1. 회원가입 (Register)
+
+// --- API 경로 시작 ---
+
+// 1. 회원가입
 app.post('/register', async (req, res) => {
     const { username, password } = req.body;
-
     try {
-        // 비밀번호 암호화 (Salt회수: 10)
         const hashedPassword = await bcrypt.hash(password, 10);
-
         const result = await pool.query(
             'INSERT INTO users (username, password) VALUES ($1, $2) RETURNING id',
             [username, hashedPassword]
         );
-
         res.status(201).json({ message: "회원가입 성공!", userId: result.rows[0].id });
     } catch (err) {
-        console.error("실제 에러 내용:", err); // 터미널 창에 진짜 원인이 뜹니다.
-        res.status(500).json({ error: err.message });
+        console.error(err);
+        res.status(500).json({ error: "아이디가 이미 존재하거나 DB 오류가 발생했습니다." });
     }
 });
 
-// 2. 로그인 (Login)
+// 2. 로그인
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
-
     try {
-        // 유저 찾기
         const user = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
-
         if (user.rows.length > 0) {
-            // DB의 암호화된 비번과 입력받은 비번 대조
             const validPassword = await bcrypt.compare(password, user.rows[0].password);
-
             if (validPassword) {
                 res.json({ message: "로그인 성공! 환영합니다." });
             } else {
@@ -59,9 +51,11 @@ app.post('/login', async (req, res) => {
             res.status(404).json({ error: "존재하지 않는 사용자입니다." });
         }
     } catch (err) {
+        console.error(err);
         res.status(500).json({ error: "서버 오류" });
     }
 });
 
-const PORT = process.env.PORT || 3000;
+// 서버 실행
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => console.log(`서버가 포트 ${PORT}에서 실행 중입니다.`));
